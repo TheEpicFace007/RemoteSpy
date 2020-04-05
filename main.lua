@@ -63,7 +63,7 @@ local hook = function(method, instance, ...)
             return
         end
 
-        ui.update(object.log, {...})
+        ui.update(object, {...})
         methods.set_context(old_context)
     end
 
