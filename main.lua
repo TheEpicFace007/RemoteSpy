@@ -29,17 +29,20 @@ local remote_check = {
 
 local import = function(asset)
     if type(asset) == "string" then
-        return loadstring(readfile("remotespy/" .. asset .. '.lua'))()
+        return loadstring(readfile("hydroxide/remotespy/" .. asset .. '.lua'))()
     end
 end
 
 local remote_spy_hook = Instance.new("BindableFunction")
-remote_spy_hook.OnInvoke = function(instance)
-    local object = remote.new(instance)
-    object.log = ui.create_log(object)
-
-    return object
+remote_spy_hook.OnInvoke = function(object)
+    return ui.create_log(object)
 end
+
+getgenv().rs = {}
+rs.methods = methods
+
+local ui = import("ui")
+local remote = import("objects/remote")
 
 local hook = function(method, instance, ...)
     if methods.check_caller() and instance == remote_spy_hook then
@@ -53,7 +56,8 @@ local hook = function(method, instance, ...)
         methods.set_context(6)
 
         if not object then
-            object = remote_spy_hook.Invoke(remote_spy_hook, instance)
+            object = remote.new(instance)
+            object.logs = remote_spy_hook.Invoke(remote_spy_hook, object)
         end
 
         if methods.check_caller() or object.ignore then
@@ -68,27 +72,21 @@ local hook = function(method, instance, ...)
         methods.set_context(old_context)
     end
 
-    return method(obj, ...)
+    return method(instance, ...)
 end
-
-getgenv().rs = {}
-rs.methods = methods
-
-local ui = import("ui")
-local remote = import("objects/remote")
 
 local gmt = methods.get_metatable(game)
 local nmc = gmt.__namecall
 
 for object_name, method in pairs(remote_check) do
     local original_method 
-    original_method = methods.hook_function(method, function(obj, ...)
-        return hook(original_method, obj, ...)
+    original_method = methods.hook_function(method, function(instance, ...)
+        return hook(original_method, instance, ...)
     end)
 end
 
 methods.set_readonly(gmt, false)
 
-gmt.__namecall = function(obj, ...)
-    return hook(nmc, obj, ...)
+gmt.__namecall = function(instance, ...)
+    return hook(nmc, instance, ...)
 end
