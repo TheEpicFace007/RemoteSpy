@@ -15,9 +15,10 @@ for name, method in pairs(methods) do
     end
 end
 
-if #missing_methods == 0 then
-    error(("Your exploit is missing: %s"):format(missing_methods:sub(1, -3)))
-end
+assert(
+    #missing_methods == 0, 
+    ("Your exploit is missing: %s"):format(missing_methods:sub(1, -3))
+)
 
 local remote_check = {
     RemoteEvent = Instance.new("RemoteEvent").FireServer,
@@ -69,6 +70,9 @@ local hook = function(method, instance, ...)
 
     return method(obj, ...)
 end
+
+getgenv().rs = {}
+rs.methods = methods
 
 local ui = import("ui")
 local remote = import("objects/remote")
