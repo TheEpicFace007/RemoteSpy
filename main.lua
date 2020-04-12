@@ -1,3 +1,7 @@
+if rs then
+    rs.exit()
+end
+
 local methods, missing_methods = {
     get_metatable = getrawmetatable or debug.getmetatable or false,
     get_context = (syn and syn.get_thread_identity) or getthreadcontext or false,
@@ -20,12 +24,12 @@ assert(
     ("Your exploit is missing: %s"):format(missing_methods:sub(1, -3))
 )
 
-local remote_check = {
-    RemoteEvent = Instance.new("RemoteEvent").FireServer,
-    RemoteFunction = Instance.new("RemoteFunction").InvokeServer,
-    BindableEvent = Instance.new("BindableEvent").Fire,
-    BindableFunction = Instance.new("BindableFunction").Invoke
-}
+local players = game:GetService("Players")
+local client = players.LocalPlayer
+local player_scripts = client.PlayerScripts
+
+local gmt = getrawmetatable(game)
+local nmc = gmt.__namecall
 
 local import = function(asset)
     if type(asset) == "string" then
@@ -33,60 +37,66 @@ local import = function(asset)
     end
 end
 
-local remote_spy_hook = Instance.new("BindableFunction")
-remote_spy_hook.OnInvoke = function(object)
-    return ui.create_log(object)
-end
+local hooks = {}
+local remotes = {
+    RemoteEvent = Instance.new("RemoteEvent").FireServer,
+    RemoteFunction = Instance.new("RemoteFunction").InvokeServer,
+    BindableEvent = Instance.new("BindableEvent").Fire,
+    BindableFunction = Instance.new("BindableFunction").Invoke
+}
 
 getgenv().rs = {}
 rs.methods = methods
+rs.exit = function()
+    gmt.__namecall = hooks.namecall
+
+    for i,v in pairs(hooks) do
+        hookfunction(remotes[i], v)
+    end
+
+    rs.ui.exit()
+end
 
 local ui = import("ui")
 local remote = import("objects/remote")
 
-local hook = function(method, instance, ...)
-    if methods.check_caller() and instance == remote_spy_hook then
-        return method(instance, ...)
-    end
+rs.ui = ui
+rs.remote = remote
 
-    if remote_check[instance.ClassName] then
-        local old_context = methods.get_context()
-        local object = remote.cache[instance]
+local create_log = Instance.new("BindableFunction")
+create_log.OnInvoke = ui.create_log
 
-        methods.set_context(6)
+local hook = function(method, env, instance, ...)
+    local returns = table.pack(method(instance, ...))
+    
+    --local script = rawget(env, "script")     
+    if (instance ~= create_log and remotes[instance.ClassName]) then
+        local old = syn_context_get()
+        syn_context_set(6)
+
+        local object = rs.cache[instance] 
 
         if not object then
             object = remote.new(instance)
-            object.logs = remote_spy_hook.Invoke(remote_spy_hook, object)
+            object.log = create_log.Invoke(create_log, instance)
         end
 
-        if methods.check_caller() or object.ignore then
-            return method(instance, ...)
-        end
-
-        if object.block then
-            return
-        end
-
-        ui.update(object, {...})
-        methods.set_context(old_context)
+        ui.update(object, {...}, returns)
+        syn_context_set(old)
     end
-
-    return method(instance, ...)
+    
+    return unpack(returns)
 end
 
-local gmt = methods.get_metatable(game)
-local nmc = gmt.__namecall
-
-for object_name, method in pairs(remote_check) do
-    local original_method 
-    original_method = methods.hook_function(method, function(instance, ...)
-        return hook(original_method, instance, ...)
+for i,v in pairs(remotes) do
+    hooks[i] = hookfunction(v, function(instance, ...)
+        return hook(hooks[i], getfenv(2), instance, ...)
     end)
 end
 
-methods.set_readonly(gmt, false)
+setreadonly(gmt, false)
 
+hooks.namecall = nmc
 gmt.__namecall = function(instance, ...)
-    return hook(nmc, instance, ...)
+    return hook(nmc, getfenv(2), instance, ...)
 end

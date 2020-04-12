@@ -1,6 +1,6 @@
-local remote = {
-    cache = {}
-}
+local remote = {}
+
+rs.cache = {}
 
 remote.new = function(instance)
     local object = {
@@ -11,7 +11,7 @@ remote.new = function(instance)
         instance = instance
     }
 
-    remote.cache[instance] = object
+    rs.cache[instance] = object
     return object
 end
 
