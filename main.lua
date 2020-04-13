@@ -1,5 +1,6 @@
-if rs then
+if rs and rs.exit then
     rs.exit()
+    getgenv().rs = nil
 end
 
 local methods, missing_methods = {
@@ -7,10 +8,11 @@ local methods, missing_methods = {
     get_context = getthreadcontext or syn_context_get or false,
     set_readonly = setreadonly or false,
     set_context = setthreadcontext or syn_context_set or false,
+    set_clipboard = setclipboard or false,
     new_cclosure = newcclosure or false,
     hook_function = hookfunction or replaceclosure or false,
     check_caller = checkcaller or false,
-    is_readonly = isreadonly or false
+    is_readonly = isreadonly or false,
 }, ""
 
 for name, method in pairs(methods) do
@@ -45,8 +47,12 @@ local remotes = {
     BindableFunction = Instance.new("BindableFunction").Invoke
 }
 
+setreadonly(gmt, false)
+
 getgenv().rs = {}
 rs.methods = methods
+rs.import = import
+rs.generate_script = import("base/generate")
 rs.exit = function()
     gmt.__namecall = hooks.namecall
 
@@ -61,8 +67,9 @@ rs.exit = function()
     rs.ui.exit()
 end
 
-local ui = import("ui")
+local ui = import("ui/main")
 local remote = import("objects/remote")
+import("methods")
 
 rs.ui = ui
 rs.remote = remote
@@ -71,25 +78,35 @@ local create_log = Instance.new("BindableFunction")
 create_log.OnInvoke = ui.create_log
 
 local hook = function(method, env, instance, ...)
-    local returns = table.pack(method(instance, ...))
-    
-    --local script = rawget(env, "script") 
+    local returns 
     if (instance ~= create_log and remotes[instance.ClassName]) then
         local old = methods.get_context()
+        local object = rs.cache[instance] 
+
         methods.set_context(6)
 
-        local object = rs.cache[instance] 
+        if string.find(instance.ClassName, "Function") then
+            returns = table.pack(method(instance, ...))
+        end
 
         if not object then
             object = remote.new(instance)
             object.log = create_log.Invoke(create_log, instance)
         end
 
+        if object.block then
+            return
+        end
+
+        if object.ignore then
+            return (returns and (unpack(returns))) or method(instance, ...)
+        end
+
         ui.update(object, {...}, returns)
         methods.set_context(old)
     end
     
-    return unpack(returns)
+    return (returns and (unpack(returns))) or method(instance, ...)
 end
 
 for i,v in pairs(remotes) do
@@ -97,8 +114,6 @@ for i,v in pairs(remotes) do
         return hook(hooks[i], getfenv(2), instance, ...)
     end)
 end
-
-setreadonly(gmt, false)
 
 hooks.namecall = nmc
 gmt.__namecall = function(instance, ...)
