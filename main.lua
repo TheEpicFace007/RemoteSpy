@@ -35,7 +35,8 @@ local nmc = gmt.__namecall
 
 local import = function(asset)
     if type(asset) == "string" then
-        return loadstring(readfile("hydroxide/remotespy/" .. asset .. '.lua'))()
+        return loadstring(game:HttpGetAsync(("https://raw.githubusercontent.com/Upbolt/RemoteSpy/master/%s.lua"):format(asset)))
+        --return loadstring(readfile("hydroxide/remotespy/" .. asset .. '.lua'))()
     end
 end
 
