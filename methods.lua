@@ -13,33 +13,33 @@ local to_unicode = function(string)
 end
 
 local userdata_value = function(data)
-    local type = typeof(data)
+    local data_type = typeof(data)
 
-    if type == "Instance" then
+    if data_type == "Instance" then
         return methods.get_path(data)
     elseif 
-        type == "Vector3" or
-        type == "Vector2" or
-        type == "CFrame" or
-        type == "Color3" 
+        data_type == "Vector3" or
+        data_type == "Vector2" or
+        data_type == "CFrame" or
+        data_type == "Color3" 
     then
-        return type .. ".new(" .. tostring(data) .. ")"
-    elseif type == "CFrame" then
+        return data_type .. ".new(" .. tostring(data) .. ")"
+    elseif data_type == "CFrame" then
         return "CFrame.new(" .. tostring(data) .. ")"
-    elseif type == "Color3" then
+    elseif data_type == "Color3" then
         return "Color3.new(" .. tostring(data) .. ")"
-    elseif type == "Ray" then
+    elseif data_type == "Ray" then
         local split = tostring(data):split('}, ')
         local origin = split[1]:gsub('{', "Vector3.new("):gsub('}', ')')
         local direction = split[2]:gsub('{', "Vector3.new("):gsub('}', ')')
         return "Ray.new(" .. origin .. "), " .. direction .. ')'
-    elseif type == "ColorSequence" then
+    elseif data_type == "ColorSequence" then
         return "ColorSequence.new(" .. methods.data_to_string(v.Keypoints) .. ')'
-    elseif type == "ColorSequenceKeypoint" then
-        return "ColorSequenceKeypoint.new(" .. data.Time .. ", Color3.new(" .. tostring(data.Value) .. "))" 
+    elseif data_type == "ColorSequenceKeypoint" then
+        return "ColorSequenceKeypoint.new(" .. data.Time .. ", Color3.new(" .. tostring(data.Value) .. "))"
     end
 
-    return tostring(data)
+    return methods.to_string(data)
 end
 
 methods.to_string = function(value)
@@ -100,7 +100,8 @@ methods.data_to_string = function(data, indents)
         return userdata_value(data)
     elseif data_type == "string" then
         if #(data:gsub('%w', ''):gsub('%s', ''):gsub('%p', '')) > 0 then
-            return to_unicode(data)
+            local success, result = pcall(to_unicode, data)
+            return (success and result) or methods.to_string(data)
         else
             return ('"%s"'):format(data:gsub('"', '\\"'))
         end

@@ -25,7 +25,7 @@ handler.add = function(menu, callbacks, extra)
                 rs.methods.set_context(6)
 
                 if callback then
-                    callback((extra and rs.cache[extra.instance]) or nil)
+                    callback((extra and extra.param) or nil)
                 end
                 
                 menu.Visible = false

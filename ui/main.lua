@@ -94,7 +94,7 @@ local create_arg = function(call, index, value)
     arg.Parent = call.Contents
 end
 
-local create_call = function(instance, vargs, returns)
+local create_call = function(instance, vargs, env, returns)
     local call = assets.CallPod.Clone(assets.CallPod)
 
     if #vargs == 0 then
@@ -112,11 +112,17 @@ local create_call = function(instance, vargs, returns)
             rs.methods.set_clipboard(generate_script(instance, vargs))
         end,
 
+        CallingScript = function(env)
+            if env and rawget(env, "script") then
+                rs.methods.set_clipboard(rs.methods.get_path(rawget(env, "script")))
+            end
+        end,
+
         Remove = function()
             logs_results.CanvasSize = logs_results.CanvasSize - call_size
             call:Destroy()
         end
-    }))
+    }, { param = env }))
 
     call.Parent = logs_results
     logs_results.CanvasSize = logs_results.CanvasSize + call_size
@@ -230,7 +236,7 @@ local create_log = function(instance)
         elseif not remote.ignore and not remote.block then
             normal_anim:Play()
         end
-    end, instance = instance}))
+    end, param = instance}))
 
     button.MouseButton1Click:Connect(function()
         local remote = rs.cache[instance]
@@ -252,8 +258,8 @@ local create_log = function(instance)
             logs_indication.Label.Text = remote_name
             logs_indication.Icon.Image = icons[instance_class]
 
-            for i,args in pairs(remote.logs) do
-                create_call(instance, args)
+            for i,call in pairs(remote.logs) do
+                create_call(instance, call.args, call.env, call.returns)
             end
             
             selected_remote = remote
@@ -278,7 +284,7 @@ local create_log = function(instance)
     return log
 end
 
-local update = function(remote, vargs, returns)
+local update = function(remote, data)
     local log = remote.log
 
     local icon = log.Icon
@@ -286,7 +292,8 @@ local update = function(remote, vargs, returns)
     local call_count = log.Calls
 
     remote.calls = remote.calls + 1
-    table.insert(remote.logs, vargs)
+
+    table.insert(remote.logs, data)
 
     local call_width = text_service.GetTextSize(text_service, tostring(remote.calls), 16, "SourceSans", constants.max_width).X + 10
 
@@ -294,7 +301,7 @@ local update = function(remote, vargs, returns)
     call_count.Size = UDim2.new(0, call_width, 0, 20)
 
     if selected_remote == remote then
-        create_call(remote.instance, vargs, returns)
+        create_call(remote.instance, data.args, data.env, data.returns)
     end
 
     if not call_count.Text.Fits then

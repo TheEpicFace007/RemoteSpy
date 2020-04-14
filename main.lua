@@ -35,8 +35,8 @@ local nmc = gmt.__namecall
 
 local import = function(asset)
     if type(asset) == "string" then
-        return loadstring(game:HttpGetAsync(("https://raw.githubusercontent.com/Upbolt/RemoteSpy/master/%s.lua"):format(asset)))()
-        --return loadstring(readfile("hydroxide/remotespy/" .. asset .. '.lua'))()
+        --return loadstring(game:HttpGetAsync(("https://raw.githubusercontent.com/Upbolt/RemoteSpy/master/%s.lua"):format(asset)))()
+        return loadstring(readfile("hydroxide/remotespy/" .. asset .. '.lua'))()
     end
 end
 
@@ -107,7 +107,7 @@ local hook = function(method, env, instance, ...)
             return method(instance, ...)
         end
 
-        ui.update(object, {...}, returns)
+        ui.update(object, { args = {...}, env = env, returns = returns })
         methods.set_context(old)
     end
     
