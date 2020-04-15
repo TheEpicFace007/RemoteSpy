@@ -33,10 +33,17 @@ local player_scripts = client.PlayerScripts
 local gmt = getrawmetatable(game)
 local nmc = gmt.__namecall
 
+local import_cache = {}
 local import = function(asset)
+    if import_cache[asset] then
+        return import_cache[asset]
+    end
+
     if type(asset) == "string" then
         --return loadstring(game:HttpGetAsync(("https://raw.githubusercontent.com/Upbolt/RemoteSpy/master/%s.lua"):format(asset)))()
-        return loadstring(readfile("hydroxide/remotespy/" .. asset .. '.lua'))()
+        local data = loadstring(readfile("hydroxide/remotespy/" .. asset .. '.lua'))()
+        import_cache[asset] = data
+        return data
     end
 end
 

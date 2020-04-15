@@ -93,7 +93,7 @@ methods.get_path = function(instance)
     return methods.get_path(instance.Parent) .. head
 end
 
-methods.data_to_string = function(data, indents)
+methods.data_to_string = function(data, root, indents)
     local data_type = type(data)
 
     if data_type == "userdata" then
@@ -107,14 +107,15 @@ methods.data_to_string = function(data, indents)
         end
     elseif data_type == "table" then
         indents = indents or 1
-        
+        root = root or data
+
         local head = '{\n'
         local elements = 0
         local indent = ('\t'):rep(indents)
         
         for i,v in pairs(data) do
-            if i ~= data and v ~= data then
-                head = head .. ("%s[%s] = %s,\n"):format(indent, methods.data_to_string(i, indents + 1), methods.data_to_string(v, indents + 1))
+            if i ~= root and v ~= root then
+                head = head .. ("%s[%s] = %s,\n"):format(indent, methods.data_to_string(i, root, indents + 1), methods.data_to_string(v, root, indents + 1))
             else
                 head = head .. ("%sHUSH_CYCLIC_PROTECTION,\n"):format(indent)
             end
