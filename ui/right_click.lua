@@ -1,11 +1,19 @@
 local players = game:GetService("Players")
+local user_input = game:GetService("UserInputService")
+
 local client = players.LocalPlayer
 local mouse = client:GetMouse()
 
 local handler = {}
 local cache = {}
 
-local selected_menu 
+local selected_menu
+
+rs.events.right_click_event = user_input.InputEnded:Connect(function(e)
+    if e.UserInputType == Enum.UserInputType.MouseButton1 and selected_menu then
+        selected_menu.Visible = false
+    end
+end)
 
 handler.add = function(menu, callbacks, extra)
     return (function()
@@ -27,8 +35,7 @@ handler.add = function(menu, callbacks, extra)
                 if callback then
                     callback((extra and extra.param) or nil)
                 end
-                
-                menu.Visible = false
+
                 rs.methods.set_context(old)
             end)
         end

@@ -23,7 +23,7 @@ local drag = function(drag, base)
 		end
 	end)
 
-	user_input.InputChanged:Connect(function(input)
+	rs.events.drag_event = user_input.InputChanged:Connect(function(input)
 		if input == dragInput and dragging then
 			local delta = input.Position - dragStart
 			base.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)

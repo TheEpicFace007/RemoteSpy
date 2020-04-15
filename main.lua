@@ -58,18 +58,19 @@ local remotes = {
 setreadonly(gmt, false)
 
 getgenv().rs = {}
+rs.events = {}
 rs.methods = methods
 rs.import = import
 rs.generate_script = import("base/generate")
 rs.exit = function()
     gmt.__namecall = hooks.namecall
 
-    for class,original_method in pairs(hooks) do
-        local method = remotes[class]
+    for class, method in pairs(remotes) do
+        hookfunction(method, hooks[class])
+    end
 
-        if method then
-            methods.hook_function(method, original_method)
-        end
+    for name, event in pairs(rs.events) do
+        event:Disconnect()
     end
 
     rs.ui.exit()
