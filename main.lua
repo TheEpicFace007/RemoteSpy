@@ -40,8 +40,8 @@ local import = function(asset)
     end
 
     if type(asset) == "string" then
-        --return loadstring(game:HttpGetAsync(("https://raw.githubusercontent.com/Upbolt/RemoteSpy/master/%s.lua"):format(asset)))()
-        local data = loadstring(readfile("hydroxide/remotespy/" .. asset .. '.lua'))()
+        local data = loadstring(game:HttpGetAsync(("https://raw.githubusercontent.com/Upbolt/RemoteSpy/master/%s.lua"):format(asset)))()
+        --local data = loadstring(readfile("hydroxide/remotespy/" .. asset .. '.lua'))()
         import_cache[asset] = data
         return data
     end
