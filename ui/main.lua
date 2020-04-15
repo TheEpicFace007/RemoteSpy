@@ -169,25 +169,25 @@ local create_log = function(instance)
         end,]]
 
         Block = function(remote)
-            remote.block = not remote.block
+            remote.blocked = not remote.blocked
 
-            if not remote.block and not remote.ignore then
+            if not remote.blocked and not remote.ignored then
                 normal_anim:Play()
-            elseif not remote.block and remote.ignore then
+            elseif not remote.blocked and remote.ignored then
                 ignore_anim:Play()
-            elseif remote.block then
+            elseif remote.blocked then
                 block_anim:Play()
             end
         end,
 
         Ignore = function(remote)
-            remote.ignore = not remote.ignore
+            remote.ignored = not remote.ignored
 
-            if not remote.ignore and not remote.block then
+            if not remote.ignored and not remote.blocked then
                 normal_anim:Play()
-            elseif not remote.block and remote.ignore then
+            elseif remote.blocked and not remote.ignored then
                 block_anim:Play()
-            elseif remote.ignore then
+            elseif remote.ignored then
                 ignore_anim:Play()
             end
         end,
@@ -203,19 +203,19 @@ local create_log = function(instance)
         local ignore = selected_menu.List.Ignore
         local block = selected_menu.List.Block
 
-        ignore.Label.Text = (remote.ignore and "Unignore Calls") or "Ignore Calls"
-        ignore.Icon.Image = (remote.ignore and icons.unignore) or icons.ignore
+        ignore.Label.Text = (remote.ignored and "Unignore Calls") or "Ignore Calls"
+        ignore.Icon.Image = (remote.ignored and icons.unignore) or icons.ignore
 
-        block.Label.Text = (remote.block and "Unblock Calls") or "Block Calls"
-        block.Icon.Image = (remote.block and icons.unblock) or icons.block
+        block.Label.Text = (remote.blocked and "Unblock Calls") or "Block Calls"
+        block.Icon.Image = (remote.blocked and icons.unblock) or icons.block
 
-        if remote.block and log.Label.TextColor3 ~= constant.blocked_color then
+        --[[if remote.block and log.Label.TextColor3 ~= constant.blocked_color then
             block_anim:Play()
         elseif remote.ignore and log.Label.TextColor3 ~= constant.ignored_color then
             ignore_anim:Play()
         elseif not remote.ignore and not remote.block then
             normal_anim:Play()
-        end
+        end]]
     end, param = rs.cache[instance]}))
 
     button.MouseButton1Click:Connect(function()

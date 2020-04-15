@@ -40,8 +40,8 @@ local import = function(asset)
     end
 
     if type(asset) == "string" then
-        local data = loadstring(game:HttpGetAsync(("https://raw.githubusercontent.com/Upbolt/RemoteSpy/master/%s.lua"):format(asset)))()
-        --local data = loadstring(readfile("hydroxide/remotespy/" .. asset .. '.lua'))()
+        --local data = loadstring(game:HttpGetAsync(("https://raw.githubusercontent.com/Upbolt/RemoteSpy/master/%s.lua"):format(asset)))()
+        local data = loadstring(readfile("hydroxide/remotespy/" .. asset .. '.lua'))()
         import_cache[asset] = data
         return data
     end
@@ -102,11 +102,11 @@ local hook = function(method, env, instance, ...)
             object.log = create_log.Invoke(create_log, instance)
         end
 
-        if object.block then
+        if object.blocked then
             return
         end
 
-        if object.ignore then
+        if object.ignored then
             if returns then
                 return unpack(returns)
             end
