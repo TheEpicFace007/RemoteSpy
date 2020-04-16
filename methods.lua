@@ -72,7 +72,7 @@ methods.get_path = function(instance)
     local head = '.' .. name
     
     if not instance.Parent and instance ~= game then
-        return head .. " --[[ PARENTED TO NIL OR DESTOYED ]]"
+        return head .. " --[[ PARENTED TO NIL OR DESTROYED ]]"
     end
     
     if instance == game then

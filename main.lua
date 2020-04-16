@@ -9,7 +9,6 @@ local methods, missing_methods = {
     set_readonly = setreadonly or false,
     set_context = setthreadcontext or syn_context_set or false,
     set_clipboard = setclipboard or false,
-    new_cclosure = newcclosure or false,
     hook_function = hookfunction or replaceclosure or false,
     check_caller = checkcaller or false,
     is_readonly = isreadonly or false,
