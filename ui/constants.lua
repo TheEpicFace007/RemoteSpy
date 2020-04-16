@@ -1,13 +1,20 @@
 local constants = {
     empty_logs = UDim2.new(0, 0, 0, 15),
+
+    block_size = UDim2.new(0, 62, 0, 20),
+    unblock_size = UDim2.new(0, 80, 0, 20),
+    ignore_size = UDim2.new(0, 66, 0, 20),
+    unignore_size = UDim2.new(0, 84, 0, 20),
+
+    blocked_color = Color3.fromRGB(170, 0, 0),
+    ignored_color = Color3.fromRGB(100, 100, 100),
+    normal_color = Color3.fromRGB(200, 200, 200),
+
     tween_time = TweenInfo.new(0.15),
     max_width = Vector2.new(133742069, 20),
     log_hover = Color3.fromRGB(50, 50, 50),
     log_leave = Color3.fromRGB(40, 40, 40),
-    log_size = UDim2.new(0, 0, 0, 25),
-    blocked_color = Color3.fromRGB(170, 0, 0),
-    ignored_color = Color3.fromRGB(100, 100, 100),
-    normal_color = Color3.fromRGB(200, 200, 200)
+    log_size = UDim2.new(0, 0, 0, 25)
 }
 
 local icons = {

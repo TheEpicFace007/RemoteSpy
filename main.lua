@@ -103,20 +103,15 @@ local hook = function(method, env, instance, ...)
             object.log = create_log.Invoke(create_log, instance)
         end
 
+        if not object.ignored then
+            ui.update(object, { args = {...}, env = env, returns = returns })
+        end
+
+        methods.set_context(old)
+
         if object.blocked then
             return
         end
-
-        if object.ignored then
-            if returns then
-                return unpack(returns)
-            end
-
-            return method(instance, ...)
-        end
-
-        ui.update(object, { args = {...}, env = env, returns = returns })
-        methods.set_context(old)
     end
     
     if returns then
@@ -126,9 +121,9 @@ local hook = function(method, env, instance, ...)
     return method(instance, ...)
 end
 
-for i,v in pairs(remotes) do
-    hooks[i] = methods.hook_function(v, function(instance, ...)
-        return hook(hooks[i], getfenv(2), instance, ...)
+for class,method in pairs(remotes) do
+    hooks[class] = methods.hook_function(method, function(instance, ...)
+        return hook(hooks[class], getfenv(2), instance, ...)
     end)
 end
 
