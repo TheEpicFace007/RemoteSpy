@@ -62,7 +62,8 @@ remote.new = function(instance)
         ignore = ignore,
         ignored = false,
         clear = clear,
-        instance = instance
+        instance = instance,
+        removed = false
     }
 
     rs.cache[instance] = object

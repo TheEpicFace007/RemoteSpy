@@ -201,9 +201,9 @@ local create_log = function(instance)
         Ignore = remote.ignore,
 
         Remove = function(remote)
-            remote.ignore = true
+            remote.removed = true
             remote.log = nil
-            
+
             log:Destroy()
         end
     }, { callback = function(selected_menu)
@@ -242,6 +242,7 @@ local create_log = function(instance)
         block_button.Size = (remote.blocked and constant.unblock_size) or constant.block_size
         block_button.Icon.Image = (remote.blocked and icons.unblock) or icons.block
         block_button.Label.Text = (selected_remote.blocked and "Unblock") or "Block"
+
         ignore_button.Size = (remote.ignored and constant.unignore_size) or constant.ignore_size
         ignore_button.Icon.Image = (remote.ignored and icons.unignore) or icons.ignore
         ignore_button.Label.Text = (selected_remote.ignored and "Unignore") or "Ignore"

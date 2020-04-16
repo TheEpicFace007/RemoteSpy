@@ -91,26 +91,28 @@ local hook = function(method, env, instance, ...)
     if (instance ~= create_log and remotes[instance.ClassName]) then
         local old = methods.get_context()
         local object = rs.cache[instance] 
-
-        methods.set_context(6)
-
-        if string.find(instance.ClassName, "Function") then
-            returns = table.pack(method(instance, ...))
-        end
-
+        
         if not object then
             object = remote.new(instance)
             object.log = create_log.Invoke(create_log, instance)
         end
 
-        if not object.ignored then
-            ui.update(object, { args = {...}, env = env, returns = returns })
-        end
+        if not object.removed then
+            methods.set_context(6)
+        
+            if string.find(instance.ClassName, "Function") then
+                returns = table.pack(method(instance, ...))
+            end
 
-        methods.set_context(old)
+            if not object.ignored then
+                ui.update(object, { args = {...}, env = env, returns = returns })
+            end
 
-        if object.blocked then
-            return
+            methods.set_context(old)
+
+            if object.blocked then
+                return
+            end
         end
     end
     
