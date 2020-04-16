@@ -126,9 +126,9 @@ local hook = function(method, env, instance, ...)
     return method(instance, ...)
 end
 
-for i,v in pairs(remotes) do
-    hooks[i] = methods.hook_function(v, function(instance, ...)
-        return hook(hooks[i], getfenv(2), instance, ...)
+for class,method in pairs(remotes) do
+    hooks[class] = methods.hook_function(method, function(instance, ...)
+        return hook(hooks[class], getfenv(2), instance, ...)
     end)
 end
 
