@@ -68,7 +68,8 @@ methods.to_string = function(value)
 end
 
 methods.get_path = function(instance)
-    local head = '.' .. instance.Name
+    local name = instance.Name
+    local head = '.' .. name
     
     if not instance.Parent and instance ~= game then
         return head .. " --[[ PARENTED TO NIL OR DESTOYED ]]"
@@ -85,8 +86,15 @@ methods.get_path = function(instance)
             head = ':GetService("' .. instance.ClassName .. '")'
         elseif instance == players.LocalPlayer then
             head = '.LocalPlayer' 
-        elseif instance.Name:gsub('_', ''):find('%W') then
-            head = '[' .. to_unicode(instance.Name) .. ']'
+        else
+            local non_alpha_numeric = name:gsub('[%w_]', '')
+            local no_special_chars = non_alpha_numeric:gsub('[%s%p]', '')
+            
+            if tonumber(name:sub(1, 1)) or (#non_alpha_numeric ~= 0 and #no_special_chars == 0) then
+                head = '["' .. name:gsub('"', '\\"'):gsub('\\', '\\\\') .. '"]'
+            elseif #non_alpha_numeric ~= 0 and #no_special_chars > 0 then
+                head = '[' .. to_unicode(name) .. ']'
+            end
         end
     end
     

@@ -17,7 +17,7 @@ local generate = function(instance, vargs)
     script = ("%s%s:%s("):format(script, name, methods[instance.ClassName])
 
     for i, arg in pairs(vargs) do
-        script = script .. "\n\t" .. rs.methods.data_to_string(arg, 2) .. ','
+        script = script .. "\n\t" .. rs.methods.data_to_string(arg, nil, 2) .. ','
     end
 
     return ((#vargs > 0 and script:sub(1, -2) .. '\n') or script) .. ')'
