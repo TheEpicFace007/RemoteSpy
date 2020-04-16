@@ -40,20 +40,15 @@ local import = function(asset)
     end
 
     if type(asset) == "string" then
-        local data = loadstring(game:HttpGetAsync(("https://raw.githubusercontent.com/Upbolt/RemoteSpy/master/%s.lua"):format(asset)))()
-        --local data = loadstring(readfile("hydroxide/remotespy/" .. asset .. '.lua'))()
+        --local data = loadstring(game:HttpGetAsync(("https://raw.githubusercontent.com/Upbolt/RemoteSpy/master/%s.lua"):format(asset)))()
+        local data = loadstring(readfile("hydroxide/remotespy/" .. asset .. '.lua'))()
         import_cache[asset] = data
         return data
     end
 end
 
 local hooks = {}
-local remotes = {
-    RemoteEvent = Instance.new("RemoteEvent").FireServer,
-    RemoteFunction = Instance.new("RemoteFunction").InvokeServer,
-    BindableEvent = Instance.new("BindableEvent").Fire,
-    BindableFunction = Instance.new("BindableFunction").Invoke
-}
+local remotes = import("base/constants").methods
 
 setreadonly(gmt, false)
 

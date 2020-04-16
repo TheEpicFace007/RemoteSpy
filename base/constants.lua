@@ -46,8 +46,16 @@ local syntax = {
     ["function"] = Color3.fromRGB(200, 200, 200)
 }
 
+local methods = {
+    RemoteEvent = Instance.new("RemoteEvent").FireServer,
+    RemoteFunction = Instance.new("RemoteFunction").InvokeServer,
+    BindableEvent = Instance.new("BindableEvent").Fire,
+    BindableFunction = Instance.new("BindableFunction").Invoke
+}
+
 return { 
     constants = constants, 
     icons = icons, 
-    syntax = syntax 
+    syntax = syntax,
+    methods = methods
 }

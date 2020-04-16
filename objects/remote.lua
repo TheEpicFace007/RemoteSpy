@@ -3,7 +3,7 @@ local text_service = game:GetService("TextService")
 local remote = {}
 rs.cache = {}
 
-local constants = rs.import("ui/constants")
+local constants = rs.import("base/constants")
 local constant = constants.constants
 
 local ignore = function(remote)

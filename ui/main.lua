@@ -22,10 +22,11 @@ local generate_script = rs.import("base/generate")
 local right_click = rs.import("ui/right_click")
 --local message_box = rs.import("ui/message_box")
 
-local constants = rs.import("ui/constants")
+local constants = rs.import("base/constants")
 local constant = constants.constants
 local icons = constants.icons
 local syntax = constants.syntax
+local methods = constants.methods
 
 local base = gui.Base
 local right_log = gui.RightLog
@@ -88,6 +89,10 @@ local create_call = function(instance, vargs, env, returns)
             if env and rawget(env, "script") then
                 rs.methods.set_clipboard(rs.methods.get_path(rawget(env, "script")))
             end
+        end,
+
+        Repeat = function()
+            methods[instance.ClassName](instance, unpack(vargs))
         end,
 
         Remove = function()
