@@ -40,8 +40,8 @@ local import = function(asset)
     end
 
     if type(asset) == "string" then
-        --local data = loadstring(game:HttpGetAsync(("https://raw.githubusercontent.com/Upbolt/RemoteSpy/master/%s.lua"):format(asset)))()
-        local data = loadstring(readfile("hydroxide/remotespy/" .. asset .. '.lua'))()
+        local data = loadstring(game:HttpGetAsync(("https://raw.githubusercontent.com/Upbolt/RemoteSpy/master/%s.lua"):format(asset)))()
+        --local data = loadstring(readfile("hydroxide/remotespy/" .. asset .. '.lua'))()
         import_cache[asset] = data
         return data
     end
@@ -91,32 +91,29 @@ local hook = function(method, env, instance, ...)
     if (instance ~= create_log and remotes[instance.ClassName]) then
         local old = methods.get_context()
         local object = rs.cache[instance] 
-
-        methods.set_context(6)
-
-        if string.find(instance.ClassName, "Function") then
-            returns = table.pack(method(instance, ...))
-        end
-
+        
         if not object then
             object = remote.new(instance)
             object.log = create_log.Invoke(create_log, instance)
         end
 
-        if object.blocked then
-            return
-        end
-
-        if object.ignored then
-            if returns then
-                return unpack(returns)
+        if not object.removed then
+            methods.set_context(6)
+        
+            if string.find(instance.ClassName, "Function") then
+                returns = table.pack(method(instance, ...))
             end
 
-            return method(instance, ...)
-        end
+            if not object.ignored then
+                ui.update(object, { args = {...}, env = env, returns = returns })
+            end
 
-        ui.update(object, { args = {...}, env = env, returns = returns })
-        methods.set_context(old)
+            methods.set_context(old)
+
+            if object.blocked then
+                return
+            end
+        end
     end
     
     if returns then

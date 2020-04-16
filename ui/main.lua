@@ -17,6 +17,7 @@ ui.assets = assets
 
 local add_drag = rs.import("ui/drag")
 
+local remote = rs.import("objects/remote")
 local generate_script = rs.import("base/generate")
 local right_click = rs.import("ui/right_click")
 --local message_box = rs.import("ui/message_box")
@@ -42,6 +43,14 @@ local list_results = list.Results.Clip.Content
 local logs_back = logs.Back
 local logs_indication = logs.RemoteObject
 local logs_results = logs.Results.Clip.Content
+
+local logs_buttons = logs.Buttons
+local block_button = logs_buttons.Block
+local ignore_button = logs_buttons.Ignore
+local clear_button = logs_buttons.Clear
+local conditions_button = logs_buttons.Conditions
+
+local selected_remote
 
 local create_arg = function(call, index, value)
     local arg = assets.RemoteArg.Clone(assets.RemoteArg)
@@ -93,6 +102,16 @@ local create_call = function(instance, vargs, env, returns)
     return call
 end
 
+local clear_logs = function(remote)
+    for i,args in pairs(logs_results:GetChildren()) do
+        if args.Name == "CallPod" then
+            args:Destroy()
+        end
+    end
+
+    logs_results.CanvasSize = constant.empty_logs
+end
+
 for i,flag in pairs(list_flags:GetChildren()) do
     if flag:IsA("Frame") then
         local body = flag.Body
@@ -106,9 +125,9 @@ for i,flag in pairs(list_flags:GetChildren()) do
             
             for k, remote in pairs(rs.cache) do
                 if not viewing[remote.instance.ClassName] then
-                    remote.log.Visible = false
+                    remote.log.instance.Visible = false
                 else
-                    remote.log.Visible = true
+                    remote.log.instance.Visible = true
                     result_size = result_size + constant.log_size
                 end
             end
@@ -123,20 +142,28 @@ logs_back.MouseButton1Click:Connect(function()
     list.Visible = true
 end)
 
-local clear_remote = function(remote)
+block_button.MouseButton1Click:Connect(function()
+    selected_remote:block()
+    block_button.Size = (selected_remote.blocked and constant.unblock_size) or constant.block_size
+    block_button.Icon.Image = (selected_remote.blocked and icons.unblock) or icons.block
+    block_button.Label.Text = (selected_remote.blocked and "Unblock") or "Block"
+end)
 
-end
+ignore_button.MouseButton1Click:Connect(function()
+    selected_remote:ignore()
+    ignore_button.Size = (selected_remote.ignored and constant.unignore_size) or constant.ignore_size
+    ignore_button.Icon.Image = (selected_remote.ignored and icons.unignore) or icons.ignore
+    ignore_button.Label.Text = (selected_remote.ignored and "Unignore") or "Ignore"
+end)
 
-local ignore_remote = function(remote)
+clear_button.MouseButton1Click:Connect(function()
+    selected_remote:clear()
+    clear_logs()
+end)
 
-end
-
-local block_remote = function(remote)
-
-end
-
-local selected_remote
 local create_log = function(instance)
+    local object = {}
+
     local log = assets.RemoteLog.Clone(assets.RemoteLog)
     local button = log.Button
 
@@ -163,39 +190,20 @@ local create_log = function(instance)
             rs.methods.set_clipboard( rs.methods.get_path(remote.instance) )
         end,
 
-        --[[Clear = function(remote)
-            remote.logs = {}
-            remote.calls = 0
-        end,]]
+        Clear = function(remote)
+            remote:clear()
 
-        Block = function(remote)
-            remote.blocked = not remote.blocked
-
-            if not remote.blocked and not remote.ignored then
-                normal_anim:Play()
-            elseif not remote.blocked and remote.ignored then
-                ignore_anim:Play()
-            elseif remote.blocked then
-                block_anim:Play()
+            if selected_remote == remote then
+                clear_logs()
             end
         end,
-
-        Ignore = function(remote)
-            remote.ignored = not remote.ignored
-
-            if not remote.ignored and not remote.blocked then
-                normal_anim:Play()
-            elseif remote.blocked and not remote.ignored then
-                block_anim:Play()
-            elseif remote.ignored then
-                ignore_anim:Play()
-            end
-        end,
+        Block = remote.block,
+        Ignore = remote.ignore,
 
         Remove = function(remote)
-            remote.ignore = true
+            remote.removed = true
             remote.log = nil
-            
+
             log:Destroy()
         end
     }, { callback = function(selected_menu)
@@ -203,32 +211,18 @@ local create_log = function(instance)
         local ignore = selected_menu.List.Ignore
         local block = selected_menu.List.Block
 
-        ignore.Label.Text = (remote.ignored and "Unignore Calls") or "Ignore Calls"
+        ignore.Label.Text = (remote.ignored and "Unignore ") or "Ignore Calls"
         ignore.Icon.Image = (remote.ignored and icons.unignore) or icons.ignore
 
         block.Label.Text = (remote.blocked and "Unblock Calls") or "Block Calls"
         block.Icon.Image = (remote.blocked and icons.unblock) or icons.block
-
-        --[[if remote.block and log.Label.TextColor3 ~= constant.blocked_color then
-            block_anim:Play()
-        elseif remote.ignore and log.Label.TextColor3 ~= constant.ignored_color then
-            ignore_anim:Play()
-        elseif not remote.ignore and not remote.block then
-            normal_anim:Play()
-        end]]
     end, param = rs.cache[instance]}))
 
     button.MouseButton1Click:Connect(function()
         local remote = rs.cache[instance]
 
         if selected_remote ~= remote then
-            for i,args in pairs(logs_results:GetChildren()) do
-                if args.Name == "CallPod" then
-                    args:Destroy()
-                end
-            end
-
-            logs_results.CanvasSize = constant.empty_logs
+            clear_logs()
 
             local remote_name = instance.Name
             local indication_width = text_service:GetTextSize(remote_name, 16, "SourceSans", constant.max_width).X + 18
@@ -244,6 +238,14 @@ local create_log = function(instance)
             
             selected_remote = remote
         end
+
+        block_button.Size = (remote.blocked and constant.unblock_size) or constant.block_size
+        block_button.Icon.Image = (remote.blocked and icons.unblock) or icons.block
+        block_button.Label.Text = (selected_remote.blocked and "Unblock") or "Block"
+
+        ignore_button.Size = (remote.ignored and constant.unignore_size) or constant.ignore_size
+        ignore_button.Icon.Image = (remote.ignored and icons.unignore) or icons.ignore
+        ignore_button.Label.Text = (selected_remote.ignored and "Unignore") or "Ignore"
 
         list.Visible = false
         logs.Visible = true
@@ -261,14 +263,18 @@ local create_log = function(instance)
         list_results.CanvasSize = list_results.CanvasSize + constant.log_size
     end
 
-    return log
+    object.instance = log
+    object.block_anim = block_anim
+    object.ignore_anim = ignore_anim
+    object.normal_anim = normal_anim
+    return object
 end
 
 local update = function(remote, data)
     remote.calls = remote.calls + 1
     table.insert(remote.logs, data)
 
-    local log = remote.log
+    local log = remote.log.instance
     local call_width = text_service.GetTextSize(text_service, tostring(remote.calls), 16, "SourceSans", constant.max_width).X + 10
 
     local icon = log.Icon
@@ -284,7 +290,7 @@ local update = function(remote, data)
 
     if not call_count.Text.Fits then
         if remote.calls < 10000 then
-            icon.Position = UDim2.new(0, call_width - 4, 0, 0)
+            icon.Position = UDim2.new(0, call_width - 4, 0, 1)
 
             local icon_width_offset = call_width + icon.AbsoluteSize.X
 
