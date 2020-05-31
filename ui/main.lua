@@ -15,13 +15,12 @@ local TextButton = Instance.new("TextButton")
 --Properties:
 
 open.Name = "open"
-open.Parent = game.CoreGui
-open.Enabled = false
+open.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
 Frame.Parent = open
-Frame.AnchorPoint = Vector2.new(0.5, 0)
-Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Frame.Position = UDim2.new(0.507751942, 0, 0.0202020202, 0)
+Frame.AnchorPoint = Vector2.new(1, 0)
+Frame.BackgroundColor3 = Color3.fromRGB(0, 255, 183)
+Frame.Position = UDim2.new(0.813307464, 0, 0, 0)
 Frame.Size = UDim2.new(0.0932977498, 0, 0.0620370395, 0)
 Frame.Style = Enum.FrameStyle.RobloxRound
 
@@ -34,7 +33,7 @@ TextButton.Style = Enum.ButtonStyle.RobloxRoundDropdownButton
 TextButton.Font = Enum.Font.GothamBold
 TextButton.Text = "Open remote spy"
 TextButton.TextSize = 15.000
-
+TextButton.TextStrokeTransparency = 2.000
 
 local tween_service = game:GetService("TweenService")
 local text_service = game:GetService("TextService")
