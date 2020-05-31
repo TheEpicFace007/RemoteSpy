@@ -6,6 +6,36 @@ local viewing = {
     BindableFunction = false
 }
 
+-- Instances:
+
+local open = Instance.new("ScreenGui")
+local Frame = Instance.new("Frame")
+local TextButton = Instance.new("TextButton")
+
+--Properties:
+
+open.Name = "open"
+open.Parent = game.CoreGui
+open.Enabled = false
+
+Frame.Parent = open
+Frame.AnchorPoint = Vector2.new(0.5, 0)
+Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Frame.Position = UDim2.new(0.507751942, 0, 0.0202020202, 0)
+Frame.Size = UDim2.new(0.0932977498, 0, 0.0620370395, 0)
+Frame.Style = Enum.FrameStyle.RobloxRound
+
+TextButton.Parent = Frame
+TextButton.AnchorPoint = Vector2.new(0.5, 0.5)
+TextButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+TextButton.Position = UDim2.new(0.5, 0, 0.5, 0)
+TextButton.Size = UDim2.new(0, 141, 0, 28)
+TextButton.Style = Enum.ButtonStyle.RobloxRoundDropdownButton
+TextButton.Font = Enum.Font.GothamBold
+TextButton.Text = "Open remote spy"
+TextButton.TextSize = 15.000
+
+
 local tween_service = game:GetService("TweenService")
 local text_service = game:GetService("TextService")
 
@@ -165,6 +195,17 @@ clear_button.MouseButton1Click:Connect(function()
     selected_remote:clear()
     clear_logs()
 end)
+
+ui.gui.Base.Body.Drag.Collapse.MouseButton1Click:Connect(function()
+    ui.gui.Enabled = false
+    open.Enabled = true
+end)
+
+TextButton.MouseButton1Click:Connect(function ()
+    ui.gui.Enabled = true
+    open.Enabled = false
+end)
+
 
 local create_log = function(instance)
     local object = {}
